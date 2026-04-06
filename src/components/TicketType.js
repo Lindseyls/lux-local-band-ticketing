@@ -20,13 +20,13 @@ function TicketType({ ticket, quantity, onQuantityChange }) {
       <div className="ticket-type-info">
         <h3>{ticket.name}</h3>
         <p className="ticket-description">{ticket.description}</p>
-        <p className="ticket-price">${(ticket.cost / 100).toFixed(0)}</p>
+        <p className="ticket-price">${ticket.price.toFixed(2)}</p>
       </div>
 
       <input
         type="number"
         min="0"
-        value={quantity}
+        value={quantity ?? 0}
         onChange={handleChange}
         className="ticket-input"
       />

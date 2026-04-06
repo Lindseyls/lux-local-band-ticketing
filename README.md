@@ -1,81 +1,111 @@
-# Touring Band Ticket Purchase Form
+# LUX — Local User Experience
 
-This is a React-based web form for purchasing concert tickets for various bands. The application allows users to select a band, view their concert information, choose ticket quantities, enter payment details, and simulate a ticket purchase.
+A full stack ticketing platform built for local venues and independent artists who want a transparent, fee-free alternative to large ticketing platforms.
 
---
+## The Problem
 
-## How to Run Locally
+Large ticketing platforms charge excessive fees and take significant cuts from small artists and local venues who don't have the leverage to negotiate. LUX gives local businesses a simple, direct way to sell tickets to their fans.
 
-1. Clone the repository: `git clone https://github.com/Lindseyls/Touring-Band-Ticket-Form.git`
-2. Install deps: `npm install`
-3. Start app: `npm start`
+## Live Demo
 
-The app will open at `http://localhost:3000`.
+[View the live app here](your_vercel_url_here)
 
-## Notes
+## Tech Stack
 
-- Data is loaded from JSON in `src/band-json/`
-- No backend — there will be an alert that gets triggered when the uesr clicks, "Get Tickets"
-
-## File structure
-
-### Before:
-
-```text
-src/
-|-- band-json/
-| |-- kpop-band.json
-| |-- punk-band.json
-| |-- ska-band.json
-|-- App.js
-|-- BandForm.js
-|-- index.css
-|-- index.js
-```
-
-### After/Current:
-
-```text
-src/
-|-- band-json/
-| |-- kpop-band.json
-| |-- punk-band.json
-| |-- ska-band.json
-|-- components/
-| |-- BandInfo.js # Left column: band image and description
-| |-- BandTicketForm.js # Top-level layout: header + two columns (left and right)
-| |-- PaymentForm.js # Personal input: Name and address, payment input: card info
-| |-- TicketForm.js # Right column: handles all form fields and tickets
-| |-- TicketType.js # One ticket option (name, description, price, quantity input)
-| |-- TotalAmount.js # Calculates the ticket total
-|-- App.js # Entry point. Loads one band and passes it to BandTicketForm
-|-- index.css
-|-- index.js
-```
+- **Frontend:** React
+- **Backend/API:** Supabase (auto-generated RESTful API)
+- **Database:** PostgreSQL (hosted on Supabase)
+- **Styling:** CSS
+- **Deployment:** Vercel
 
 ## Features
 
-- Select from multiple bands (loaded from JSON)
-- View band image, description, date, and location
-- Choose ticket types and quantities
-- View a live-updating total ticket cost
-- Enter personal and payment information
-- Submit the form with a simulated backend alert
+- Browse local bands and view event details
+- Select ticket types and quantities with live total calculation
+- Enter customer and payment information
+- Submit orders persisted to a real PostgreSQL database
+- Customer deduplication by email — returning customers reuse their existing record rather than creating duplicates
+- Responsive component-based React architecture
 
-## Acceptance Criteria Checklist
+## File Structure
 
-This app satisfies all the required features outlined in the take-home project prompt:
+```
+src/
+├── components/
+│   ├── specs/
+│   │   ├── App.test.js          # Tests for App component — loading, success, empty, error states
+│   │   └── TotalAmount.test.js  # Tests for TotalAmount — pricing calculation logic
+│   ├── BandInfo.js              # Band image and description (left column)
+│   ├── BandTicketForm.js        # Top level layout — header and two columns
+│   ├── PaymentForm.js           # Customer info and payment input
+│   ├── TicketForm.js            # Ticket selection and order submission
+│   ├── TicketType.js            # Individual ticket option with quantity selector
+│   └── TotalAmount.js           # Live running total calculation
+├── App.js                       # Entry point — fetches bands from Supabase
+├── index.css                    # Global styles
+└── supabaseClient.js            # Supabase client initialization
+```
 
-- [x] Band name, description, location, date, and image
-- [x] Ticket types with quantity selectors
-- [x] Total amount calculated from selected tickets
-- [x] Basic form inputs for name and card details
-- [x] "Get Tickets" button triggers a submission alert (mock backend)
+## How to Run Locally
 
-## Validation Note
+> **Note:** This app requires a Supabase project with the database schema set up to run locally. The live version can be viewed at the link above or via the walkthrough video.
 
-Basic input validation (e.g., required fields) was considered but omitted in favor of completing the core requirements and styling polish, based on the project scope provided. I'm happy to discuss how I would approach validation or other enhancements in a follow-up.
+1. Clone the repository
 
-If this were a production app, appropriate field validation and error handling would be implemented.
+```
+git clone [your repo url]
+```
 
-Thank you for reviewing this project!
+2. Install dependencies
+
+```
+npm install
+```
+
+3. Create a `.env` file in the root directory
+
+```
+REACT_APP_SUPABASE_URL=your_supabase_url
+REACT_APP_SUPABASE_KEY=your_supabase_anon_key
+```
+
+Note: Copy .env.example to .env and fill in your Supabase credentials
+
+4. Start the app
+
+```
+npm start
+```
+
+## Database Schema
+
+Five tables with a relational structure:
+
+| Table        | Description                                                                       |
+| ------------ | --------------------------------------------------------------------------------- |
+| bands        | Event info including name, description, image, date, and location                 |
+| ticket_types | Ticket options per band with pricing — linked to bands via foreign key            |
+| customers    | Customer info with email as unique identifier                                     |
+| orders       | Links customers to band purchases with payment status                             |
+| order_items  | Line items per order storing ticket type, quantity, and price at time of purchase |
+
+## Key Technical Decisions
+
+- **Prices stored in dollars not cents** — no payment processor integration yet so dollar amounts keep the data readable
+- **snake_case to camelCase transformation** — Supabase returns snake_case which is transformed to camelCase in App.js to follow React conventions
+- **Array approach for customer lookup** — avoids special Supabase error codes by using array response and checking the first element
+- **Cascade deletes on foreign keys** — deleting a band automatically cleans up its ticket types and related orders
+- **zip_code stored as text** — prevents leading zeros from being silently dropped by integer types
+- **customers table not users** — deliberately named customers since this MVP has no authentication. Users implies login and account management which is a future feature
+- **price_at_purchase on order_items** — stores the ticket price at time of purchase so order history is always accurate even if prices change later
+
+## Future Improvements
+
+- Stripe integration for real payment processing
+- User authentication so customers can log in and view order history
+- Email confirmation on order completion
+- Admin dashboard for venues to manage events and view sales
+- Row Level Security enabled in Supabase for production
+- Seat selection and capacity limits per ticket type
+- Pagination for venues with large band catalogs
+- Component level CSS modules instead of a single index.css

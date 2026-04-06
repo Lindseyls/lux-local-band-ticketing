@@ -1,20 +1,27 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import { ImCreditCard } from "react-icons/im";
 
-/**
- * Functional component that collects user personal and payment info.
- * Note: This does not actually process a payment.
- */
-function PaymentForm() {
+function PaymentForm({ onValidChange, onFormDataChange }) {
   const [formData, setFormData] = useState({
+    cardNumber: "",
+    cvv: "",
+    email: "",
+    expiry: "",
     firstName: "",
     lastName: "",
-    address: "",
-    cardNumber: "",
-    expiry: "",
-    cvv: "",
+    phone: "",
+    zipCode: "",
   });
+
+  useEffect(() => {
+    // Phone is optional so exclude it from required fields check
+    const { phone, ...requiredFields } = formData;
+    const allFilled = Object.values(requiredFields).every(
+      (val) => val.trim() !== "",
+    );
+    onValidChange(allFilled);
+    onFormDataChange(formData);
+  }, [formData, onValidChange, onFormDataChange]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,18 +49,23 @@ function PaymentForm() {
           onChange={handleChange}
         />
       </div>
-
       <input
-        type="text"
-        name="address"
-        placeholder="Address"
-        value={formData.address}
+        type="email"
+        name="email"
+        placeholder="Email Address"
+        value={formData.email}
         onChange={handleChange}
-        className="payment-input-address"
+        className="payment-input-full"
       />
-
+      <input
+        type="tel"
+        name="phone"
+        placeholder="Phone Number (optional)"
+        value={formData.phone}
+        onChange={handleChange}
+        className="payment-input-full"
+      />
       <h4>Payment Details</h4>
-
       <div className="card-input-with-icon">
         <input
           type="text"
@@ -62,10 +74,8 @@ function PaymentForm() {
           value={formData.cardNumber}
           onChange={handleChange}
         />
-
         <ImCreditCard className="card-icon" />
       </div>
-
       <div className="card-details">
         <input
           type="text"
@@ -80,6 +90,14 @@ function PaymentForm() {
           placeholder="CVV"
           value={formData.cvv}
           onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="zipCode"
+          placeholder="Zip Code"
+          value={formData.zipCode}
+          onChange={handleChange}
+          className="payment-input-zip"
         />
       </div>
     </div>

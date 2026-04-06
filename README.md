@@ -8,7 +8,7 @@ Large ticketing platforms charge excessive fees and take significant cuts from s
 
 ## Live Demo
 
-[View the live app here](your_vercel_url_here)
+[View the live app here!](https://lux-local-band-ticketing.vercel.app/)
 
 ## Tech Stack
 
